@@ -1,0 +1,86 @@
+# This is the sequence of updates that should be applied
+# to the demo rack.
+# some command might need to be updated to match service names
+# as deployed by the installer
+
+# start the full cluster as-is:
+
+1) boot the compute nodes first and make sure they are up and running
+2) boot the controller nodes
+3) start and enable the cluster (from one controller node)
+   pcs cluster enable --all
+   pcs cluster start --all
+4) wait for the whole thing to start and settle
+
+5) apply the following config changes:
+
+pcs resource update glance-registry-clone meta interleave=true
+pcs resource update glance-api-clone meta interleave=true
+pcs resource update keystone-clone meta interleave=true
+pcs resource update memcached-clone meta interleave=true
+pcs resource update nova-consoleauth-clone meta interleave=true
+pcs resource update nova-novncproxy-clone meta interleave=true
+pcs resource update nova-api-clone meta interleave=true
+pcs resource update nova-scheduler-clone meta interleave=true
+pcs resource update nova-conductor-clone meta interleave=true
+
+and make sure that all clones OpenStack services have the interleave attribute.
+Example:
+
+ Clone: keystone-clone
+  Meta Attrs: interleave=true 
+  Resource: keystone (class=systemd type=openstack-keystone)
+
+Don't apply to core services such as mongodb or galera!
+
+6) prepare update for nova-compute (Instance HA):
+
+pcs resource disable nova-compute
+
+make sure it is stopped on all compute nodes and delete it. It
+is easier to recreate than update the config due to resource-agents
+changes:
+
+pcs resource delete nova-compute
+
+take a note of the corresponding constraints that will be deleted
+
+7) stop the cluster again
+
+pcs cluster stop --all
+
+and wait for it to stop
+
+8) install the packages from http://www.kronosnet.org/demorepo/
+
+be aware that fence-agents and resource-agents might be downgrade from
+a versioning perspective but they are the correct ones
+
+the archive is currently missing a neutron build but workaround
+can be applied on all controller nodes:
+
+wget -O /usr/lib/python2.7/site-packages/neutron/plugins/ml2/drivers/type_tunnel.py http://www.kronosnet.org/demorepo/type_tunnel.py
+
+(this note will vanish if I get a build for neutron before rack is powered on)
+
+9) start the cluster again
+
+pcs cluster start --all
+
+10) recreate nova-compute entry:
+
+DOUBLE CHECK KEYSTONE VIP!
+
+pcs resource create nova-compute ocf:openstack:NovaCompute auth_url=http://192.168.140.241:35357/v2.0/ username=admin password=RHsumm\!t tenant_name=admin domain=rh.sum --clone interleave=true notify=true --disabled --force
+
+^^ this command will produce an error because nova-compute is not installed/configured on the controller nodes. No panic.
+
+Add the constraints back:
+
+pcs constraint location nova-compute-clone rule resource-discovery=exclusive score=0 osprole eq compute
+pcs constraint order start nova-conductor-clone then nova-compute-clone require-all=false
+pcs resource op add nova-compute notify timeout=600s
+
+pcs resource cleanup nova-compute
+
+^^  this will clear the error
