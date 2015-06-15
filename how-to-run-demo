@@ -1,0 +1,129 @@
+# you have all seen the demo and how I run it
+
+# PREPARE FOR ThE DEMO
+#
+
+To be done once before summit:
+CHECK:
+ - neutron ippool size on the public_lan to see
+   if it's big enough vs how many instances you want to run
+ - nova instances quota has to be double the size of
+   the amount of instances you want to run
+ - upload a RHEL image
+ - calibrate the number of instances you want to show vs
+   hw. This will need some test-try-fail-repeat.
+   we don't know yet how much this evacuation code scales
+   and we only tested 7/10 instances on our end.
+
+To be done in between every demo:
+
+- make the infrastructure is clean, start fresh for now
+
+# HOW TO RESET THE DEMO SETUP:
+
+1) delete all instances and associated floating IPs
+
+I use some thing like this:
+
+netbase=76
+for i in $(seq -w 1 7); do
+ nova delete test-$i
+ ip=$((netbase + i))
+ nova floating-ip-delete 10.16.144.$ip
+done
+
+and verify with:
+
+nova floating-ip-list
+nova list
+
+2) stop the cluster
+
+pcs cluster stop --all
+
+wait for the cluster to stop everywhere
+
+reboot the compute nodes and wait that they are fully back online
+reboot the controller nodes
+
+This will bring everything back online clean
+
+# RUN THE DEMO
+
+1) make sure pcs status doesn't show any warning or error before you start
+
+2) explain the architecture a bit, 3 controller nodes, 3 compute nodes blabla
+   yada yada
+
+3) start demo_status.sh script
+
+# REMEMBER TO FIX THE PATH TO keystonerc_admin in the script
+
+4) create the instances
+
+# YOU MUST REPLACE BOTH THE net-id and the image name.
+# The net-id come from neutron net-list, private_lan ID.
+# Image name should be obvious
+
+for i in $(seq -w 1 7); do
+ nova boot --flavor m1.tiny --image cirros --nic net-id=c0e2b12c-3066-44ee-830c-278d0c3f26ec test-$i
+ nova floating-ip-create public_lan
+ sleep 10
+done
+
+# wait for the instances to be ACTIVE and if you are planning
+# to show the ping test then associated the floaing ip
+
+netbase=76
+
+for i in $(seq -w 1 7); do
+  ip=$((netbase + i))
+  nova floating-ip-associate test-$i 10.16.144.$ip
+done
+
+# those two snippets make sure that Instance test-1 is always associated
+# with the first public_ip. It makes it easier to run the ping
+# test by knowing exactly which ip is with which instance on which
+# compute node and kill the right compute node
+
+5) simulate compute node crash
+
+if you can run the ping test
+start the ping
+identify compute node where instance is running
+crash the kernel / pull the network cable for the node
+* wait and emjoy the fireworks *
+
+CATCH(es):
+
+* ONE and only ONE at a time. Crash one, see the whole process,
+  re-add it to the cluster (see below), the crash the next.
+
+* depending on how fast the node reboots, it might or might
+  not be re-added to the cluster.
+  if NOT then issue "pcs resource clean cmp1" or cmp2 or cmp3
+
+* if the compute node is not fenced within 120 seconds,
+  you are probably hitting a know bug with fence and pacemaker_remoted.
+  Issue a "pcs resource clean cmp1" or cmp2 or cmp3 and things
+  should clear out themselves (make sure to clear it before the node
+  reboots and it's online)
+  It is a good idea to keep a console open to break the boot process
+  if the node come back online before fencing kicks in.
+
+6) simulate controller node crash
+
+Start a crm_mon on a big fat xterm with small font, check for:
+Current DC: rdo7-node2 <-
+
+for now do NOT crash that node. yet another bug we have a fix for
+but you don't have the packages yet!
+
+Crash one of the other 2 nodes, see the node being fenced, rejoin
+the cluster et all.
+
+You can run the ping test to show case network not being interrupted
+but it is a bit flacky due to a neutron bug, so be careful not to 
+overdue it.
+
+7) done
