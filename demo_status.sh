@@ -50,7 +50,7 @@ make_stat_buf() {
 	novalist="$(nova list)"
 	vmlist="$(echo "$novalist" |grep -v ^+ | grep -v ID | awk '{print $4}')"
 	for vm in $vmlist; do
-		vmstatus="$(echo "$novalist" | grep $vm | awk '{print "Instance: " $4 " Status: " $6 " State: " $10}')"
+		vmstatus="$(echo "$novalist" | grep "$vm " | awk '{print "Instance: " $4 " Status: " $6 " State: " $10}')"
 		statbuf="${statbuf}$vmstatus"
 		vmhv="$(nova show $vm | grep hypervisor_hostname | awk '{print $4}' | sed -e 's/\..*//g')"
 		statbuf="${statbuf} hypervisor: $vmhv\n"
