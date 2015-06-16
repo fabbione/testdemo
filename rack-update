@@ -84,3 +84,20 @@ pcs resource op add nova-compute notify timeout=600s
 pcs resource cleanup nova-compute
 
 ^^  this will clear the error
+
+11) improve compute nodes monitoring and make it look snappy.
+
+(requires pacemaker pacemaker-1.1.13-0.15.c960348 or higher from kronosnet repo)
+
+Issue the following global command:
+pcs property set cluster-recheck-interval=1min
+
+for every compute node (cmp1, cmp2, cmp3):
+
+pcs resource disable cmp1
+(wait to stop)
+pcs resource update cmp1 op monitor interval=20
+pcs resource update cmp1 reconnect_interval=60
+pcs resource enable cmp1
+
+got to the next compute

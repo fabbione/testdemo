@@ -104,6 +104,9 @@ CATCH(es):
 * depending on how fast the node reboots, it might or might
   not be re-added to the cluster.
   if NOT then issue "pcs resource clean cmp1" or cmp2 or cmp3
+  IF the update process has been done including point 11, this
+  will never happen and node will rejoin the cluster automatically
+  within a minute or two after the node has booted
 
 * if the compute node is not fenced within 120 seconds,
   you are probably hitting a know bug with fence and pacemaker_remoted.
