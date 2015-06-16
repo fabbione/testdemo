@@ -28,8 +28,10 @@ I use some thing like this:
 netbase=76
 for i in $(seq -w 1 7); do
  nova delete test-$i
+ sleep 2
  ip=$((netbase + i))
  nova floating-ip-delete 10.16.144.$ip
+ sleep 2
 done
 
 and verify with:
