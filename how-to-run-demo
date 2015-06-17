@@ -102,27 +102,12 @@ if you can run the ping test
 start the ping
 identify compute node where instance is running
 crash the kernel / pull the network cable for the node
-* wait and emjoy the fireworks *
+* wait and enjoy the fireworks *
 
 CATCH(es):
 
 * ONE and only ONE at a time. Crash one, see the whole process,
   re-add it to the cluster (see below), the crash the next.
-
-* depending on how fast the node reboots, it might or might
-  not be re-added to the cluster.
-  if NOT then issue "pcs resource clean cmp1" or cmp2 or cmp3
-  IF the update process has been done including point 11, this
-  will never happen and node will rejoin the cluster automatically
-  within a minute or two after the node has booted
-
-* if the compute node is not fenced within 120 seconds,
-  you are probably hitting a know bug with fence and pacemaker_remoted.
-  Issue a "pcs resource clean cmp1" or cmp2 or cmp3 and things
-  should clear out themselves (make sure to clear it before the node
-  reboots and it's online)
-  It is a good idea to keep a console open to break the boot process
-  if the node come back online before fencing kicks in.
 
 6) simulate controller node crash
 
