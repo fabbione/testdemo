@@ -50,6 +50,21 @@ reboot the controller nodes
 
 This will bring everything back online clean
 
+3) BE AWARE OF https://bugzilla.redhat.com/show_bug.cgi?id=1230485
+
+From time to time, qemu will refresh an internal image and that
+refresh will cause nova-compute to block.
+
+During that refresh compute node will be mark "down" and instances
+can fail to schedule.
+
+An easy workaround is to create enough instances to run all compute nodes
+(use the demo_status.sh to check that) and then delete them again using
+the same commands below.
+
+It is wise to do it _before_ running every demo to workaround the bug
+and at the same time testing that the environment is back online properly
+
 # RUN THE DEMO
 
 1) make sure pcs status doesn't show any warning or error before you start
@@ -67,23 +82,16 @@ This will bring everything back online clean
 # The net-id come from neutron net-list, private_lan ID.
 # Image name should be obvious
 
+netbase=76
 for i in $(seq -w 1 7); do
  nova boot --flavor m1.tiny --image cirros --nic net-id=c0e2b12c-3066-44ee-830c-278d0c3f26ec test-$i
  nova floating-ip-create public_lan
- sleep 10
+ sleep 30
+ ip=$((netbase + i))
+ nova floating-ip-associate test-$i 10.16.144.$ip
 done
 
-# wait for the instances to be ACTIVE and if you are planning
-# to show the ping test then associated the floaing ip
-
-netbase=76
-
-for i in $(seq -w 1 7); do
-  ip=$((netbase + i))
-  nova floating-ip-associate test-$i 10.16.144.$ip
-done
-
-# those two snippets make sure that Instance test-1 is always associated
+# those snippet makes sure that Instance test-1 is always associated
 # with the first public_ip. It makes it easier to run the ping
 # test by knowing exactly which ip is with which instance on which
 # compute node and kill the right compute node
