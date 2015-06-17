@@ -35,7 +35,7 @@ make_stat_buf() {
 
 	statbuf="${statbuf}Nova Hypervisors:\n-----------------\n\n"
 	hvlist="$(nova hypervisor-list | grep "^|" | grep -v ID)"
-	hostlist="$(echo "$hvlist" | awk '{print $4}')"
+	hostlist="$(echo "$hvlist" | awk '{print $4}' | sort)"
 	for hv in $hostlist; do
 		statbuf="${statbuf}$hv\n"
 		status=$(echo "$hvlist" | grep $hv | awk '{print $6}')
