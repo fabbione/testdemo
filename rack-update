@@ -53,6 +53,11 @@ and wait for it to stop
 
 8) install the packages from http://www.kronosnet.org/demorepo/
 
+# there is a dependency issue that requires a rebuild of sbd
+# sbd is not used in this setup, so for now just wipe it
+yum erase sbd
+yum update
+
 be aware that fence-agents and resource-agents might be downgrade from
 a versioning perspective but they are the correct ones
 
