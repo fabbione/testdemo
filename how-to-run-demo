@@ -126,13 +126,7 @@ CATCH(es):
 
 6) simulate controller node crash
 
-Start a crm_mon on a big fat xterm with small font, check for:
-Current DC: rdo7-node2 <-
-
-for now do NOT crash that node. yet another bug we have a fix for
-but you don't have the packages yet!
-
-Crash one of the other 2 nodes, see the node being fenced, rejoin
+Crash one of the nodes, see the node being fenced, rejoin
 the cluster et all.
 
 You can run the ping test to show case network not being interrupted
