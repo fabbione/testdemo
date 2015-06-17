@@ -61,13 +61,6 @@ yum update
 be aware that fence-agents and resource-agents might be downgrade from
 a versioning perspective but they are the correct ones
 
-the archive is currently missing a neutron build but workaround
-can be applied on all controller nodes:
-
-wget -O /usr/lib/python2.7/site-packages/neutron/plugins/ml2/drivers/type_tunnel.py http://www.kronosnet.org/demorepo/type_tunnel.py
-
-(this note will vanish if I get a build for neutron before rack is powered on)
-
 9) start the cluster again
 
 pcs cluster start --all
