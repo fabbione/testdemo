@@ -17,7 +17,12 @@ make_stat_buf() {
 	statbuf="${statbuf}Offline controller nodes:\n  $controllernodesoffline\n\n"
 
 	controllernodesunclean=$(echo "$pcsstatus" | grep ^Node | grep UNCLEAN | sed -e 's#.*Node ##g' -e 's#: UNCLEAN.*##g')
-	statbuf="${statbuf}Unclean controller nodes (will be fenced):\n  $controllernodesunclean\n\n"
+	statbuf="${statbuf}Unclean controller nodes (will be fenced):\n  "
+
+	for i in $controllernodesunclean; do
+		statbuf="${statbuf}$i "
+	done
+	statbuf="${statbuf}\n\n"
 
 	remotenodesonline=$(echo "$pcsstatus" | grep RemoteOnline | sed -e 's#.*\[ ##g' -e 's# \].*##g')
 	statbuf="${statbuf}Online remote compute nodes:\n  $remotenodesonline\n\n"
@@ -26,7 +31,12 @@ make_stat_buf() {
 	statbuf="${statbuf}Offline remote compute nodes:\n  $remotenodesoffline\n\n"
 
 	remotenodesunclean=$(echo "$pcsstatus" | grep RemoteNode | grep UNCLEAN | sed -e 's#.*RemoteNode ##g' -e 's#: UNCLEAN.*##g')
-	statbuf="${statbuf}Unclean remote compute nodes (will be fenced):\n  $remotenodesunclean\n\n"
+	statbuf="${statbuf}Unclean remote compute nodes (will be fenced):\n  "
+
+	for i in $remotenodesunclean; do
+		statbuf="${statbuf}$i "
+	done
+	statbuf="${statbuf}\n\n"
 
 	novacomputenodes=$(echo "$pcsstatus" |grep nova-compute-clone -A1 | grep Started | grep -v UNCLEAN | sed -e 's#.*\[ ##g' -e 's# \].*##g')
 	statbuf="${statbuf}Nodes running nova-compute:\n  $novacomputenodes\n"
