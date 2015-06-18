@@ -82,14 +82,22 @@ and at the same time testing that the environment is back online properly
 # The net-id come from neutron net-list, private_lan ID.
 # Image name should be obvious
 
-netbase=76
 for i in $(seq -w 1 7); do
  nova boot --flavor m1.tiny --image cirros --nic net-id=c0e2b12c-3066-44ee-830c-278d0c3f26ec test-$i
+ sleep 2
  nova floating-ip-create public_lan
- sleep 30
+ sleep 2
+done
+
+sleep 60
+
+netbase=76
+for i in $(seq -w 1 7); do
  ip=$((netbase + i))
  nova floating-ip-associate test-$i 10.16.144.$ip
 done
+
+nova list
 
 # those snippet makes sure that Instance test-1 is always associated
 # with the first public_ip. It makes it easier to run the ping
