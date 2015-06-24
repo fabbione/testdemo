@@ -2,3 +2,4 @@ parameters:
   fixed_network: 1e432bc2-415e-476e-835e-445b24f1f862
   fixed_subnet: 93e0d669-02c9-492c-9816-e19d541f4fc8
   external_network: 266738ab-69a0-4d1f-b026-13d9da09bdc0
+  image: rhel-7.2
