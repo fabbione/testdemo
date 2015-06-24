@@ -1,0 +1,8 @@
+#!/bin/sh
+
+tmux new-session -s demo -d 'sh list-on-host cmp1.rh.sum'
+tmux split-window -h 'sh list-on-host cmp2.rh.sum'
+tmux split-window -h 'sh list-on-host cmp3.rh.sum'
+
+tmux select-layout even-horizontal
+tmux attach

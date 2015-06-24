@@ -1,0 +1,34 @@
+heat_template_version: 2014-10-16
+
+parameters:
+
+  fixed_network:
+    type: string
+
+  fixed_subnet:
+    type: string
+
+  external_network:
+    type: string
+    default: public
+
+  image:
+    type: string
+
+  number_of_servers:
+    type: number
+    default: 15
+
+resources:
+
+  servers:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: {get_param: number_of_servers}
+      resource_def:
+        type: oneserver.yaml
+        properties:
+          image: {get_param: image}
+          fixed_network: {get_param: fixed_network}
+          fixed_subnet: {get_param: fixed_subnet}
+          external_network: {get_param: external_network}

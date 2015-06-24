@@ -1,0 +1,17 @@
+#!/bin/sh
+
+tmpfile=$(mktemp /tmp/novaXXXXXX)
+trap "rm -f $tmpfile" EXIT
+
+target=$1
+
+while :; do
+        nova list --field name,status,OS-EXT-SRV-ATTR:hypervisor_hostname,networks > $tmpfile
+        clear
+        echo "$target"
+        echo "==================="
+        echo
+        awk -vhost=$target '$8 == host {print $11}' $tmpfile
+
+        sleep 5
+done

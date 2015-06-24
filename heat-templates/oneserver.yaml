@@ -1,0 +1,42 @@
+heat_template_version: 2014-10-16
+
+parameters:
+
+  fixed_network:
+    type: string
+
+  fixed_subnet:
+    type: string
+
+  external_network:
+    type: string
+    default: public
+
+  image:
+    type: string
+
+resources:
+
+  server:
+    type: OS::Nova::Server
+    properties:
+      image: {get_param: image}
+      flavor: m1.small
+      networks:
+        - port: {get_resource: eth0}
+
+  eth0:
+    type: OS::Neutron::Port
+    properties:
+      network: {get_param: fixed_network}
+      security_groups:
+        - default
+      fixed_ips:
+        - subnet: {get_param: fixed_subnet}
+
+  eth0_floating:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: {get_param: external_network}
+      port_id: {get_resource: eth0}
+
