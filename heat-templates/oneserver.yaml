@@ -15,12 +15,15 @@ parameters:
   image:
     type: string
 
+  name:
+    type: string
+
 resources:
 
   server:
     type: OS::Nova::Server
     properties:
-      name: demo_server
+      name: {get_param: name}
       image: {get_param: image}
       flavor: m1.small
       networks:

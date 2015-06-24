@@ -28,6 +28,7 @@ resources:
       resource_def:
         type: oneserver.yaml
         properties:
+          name: server-%index%
           image: {get_param: image}
           fixed_network: {get_param: fixed_network}
           fixed_subnet: {get_param: fixed_subnet}
